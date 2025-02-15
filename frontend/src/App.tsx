@@ -1,13 +1,22 @@
 import "./App.css";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function App() {
+  const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
+    () => {
+      const savedMessages = localStorage.getItem("chatMessages");
+      return savedMessages ? JSON.parse(savedMessages) : [];
+    }
+  );
+
   const [genre, setGenre] = useState<string>("");
   const [nativeLanguage, setNativeLanguage] = useState<string>("");
   const [learningLanguage, setLearningLanguage] = useState<string>("");
-  const [messages, setMessages] = useState<{ sender: string; text: string }[]>(
-    []
-  );
+  const [isTyping, setIsTyping] = useState<boolean>(false);
+
+  useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(messages));
+  }, [messages]);
 
   const handleSubmit = async () => {
     if (!genre || !nativeLanguage || !learningLanguage) {
@@ -15,16 +24,14 @@ function App() {
       return;
     }
 
-    // Create user message object
+    setIsTyping(true);
+
     const userMessage = {
       sender: "user",
       text: `🎵 Genre: ${genre}\n🌍 Native: ${nativeLanguage}\n📝 Learning: ${learningLanguage}`,
     };
+    setMessages((prev) => [...prev, userMessage]);
 
-    // Add user message to chat
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
-
-    // Prepare the data to send to backend
     const requestData = { genre, nativeLanguage, learningLanguage };
 
     try {
@@ -40,9 +47,8 @@ function App() {
 
       const data = await response.json();
 
-      // Typing effect logic
-      const botMessage = { sender: "bot", text: "" };
-      setMessages((prevMessages) => [...prevMessages, botMessage]); // Add empty message first
+      let botMessage = { sender: "bot", text: "" };
+      setMessages((prev) => [...prev, botMessage]);
 
       const fullMessage = data.message;
       let currentText = "";
@@ -50,25 +56,36 @@ function App() {
       fullMessage.split("").forEach((char, index) => {
         setTimeout(() => {
           currentText += char;
-          setMessages((prevMessages) => {
-            const updatedMessages = [...prevMessages];
+          setMessages((prev) => {
+            const updatedMessages = [...prev];
             updatedMessages[updatedMessages.length - 1] = {
               sender: "bot",
               text: currentText,
             };
             return updatedMessages;
           });
-        }, 30 * index); // Adjust the speed here (30ms per character)
+
+          if (index === fullMessage.length - 1) {
+            setIsTyping(false);
+          }
+        }, 20 * index);
       });
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred while sending data.");
+      setIsTyping(false);
     }
 
-    // Clear input fields after submission
     setGenre("");
     setNativeLanguage("");
     setLearningLanguage("");
+  };
+
+  const handleClearChat = () => {
+    if (window.confirm("Are you sure you want to clear the chat?")) {
+      setMessages([]);
+      localStorage.removeItem("chatMessages");
+    }
   };
 
   return (
@@ -113,8 +130,19 @@ function App() {
           value={learningLanguage}
           onChange={(e) => setLearningLanguage(e.target.value)}
         />
-        <button className="chat-send" onClick={handleSubmit}>
-          Send
+        <button
+          className="chat-send"
+          onClick={handleSubmit}
+          disabled={isTyping}
+        >
+          {isTyping ? "Typing..." : "Send"}
+        </button>
+        <button
+          className="chat-clear"
+          onClick={handleClearChat}
+          disabled={isTyping}
+        >
+          Clear Chat
         </button>
       </div>
     </div>

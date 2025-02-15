@@ -49,11 +49,11 @@
   padding: 15px;
   background-color: #1e1e1e;
   border-radius: 10px;
-  position: sticky;
+  position: absolute;
   bottom: 0;
   width: 100%;
   max-width: 800px;
-  margin-bottom: 30px;
+  margin-bottom: 15px;
   overflow: hidden;
 }
 
