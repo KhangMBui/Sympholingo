@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_KEY = 'MY_API_KEy';
-const BASE_URL = 'https://api.suno.com/v1';
+const API_URL = 'http://localhost:3000'; // Replace with your Suno API endpoint
 
 interface GenerateMusicRequest {
   prompt: string;
@@ -14,14 +13,21 @@ interface GenerateMusicResponse {
 
 export const generateMusic = async (request: GenerateMusicRequest): Promise<GenerateMusicResponse> => {
   try {
-    const response = await axios.post<GenerateMusicResponse>(`${BASE_URL}/generate`, request, {
+    const url = `${API_URL}/api/generate_lyrics`;
+    const response = await axios.post<GenerateMusicResponse>(url, request, {
       headers: {
-        'Authorization': `Bearer ${API_KEY}`,
         'Content-Type': 'application/json'
       }
     });
     return response.data;
   } catch (error) {
-    throw new Error(`Error generating music: ${error.message}`);
+    if (error instanceof Error) {
+      throw new Error(`Error generating music: ${error.message}`);
+    } else {
+      throw new Error('An unknown error occurred');
+    }
   }
 };
+
+
+
