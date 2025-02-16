@@ -7,13 +7,21 @@ import * as cookie from 'cookie';
 import { randomUUID } from 'node:crypto';
 import { Solver } from '@2captcha/captcha-solver';
 import { paramsCoordinates } from '@2captcha/captcha-solver/dist/structs/2captcha';
-import { BrowserContext, Page, Locator, chromium, firefox } from 'rebrowser-playwright-core';
+import {
+  BrowserContext,
+  Page,
+  Locator,
+  chromium,
+  firefox
+} from 'rebrowser-playwright-core';
 import { createCursor, Cursor } from 'ghost-cursor-playwright';
 import { promises as fs } from 'fs';
 import path from 'node:path';
 
 // sunoApi instance caching
-const globalForSunoApi = global as unknown as { sunoApiCache?: Map<string, SunoApi> };
+const globalForSunoApi = global as unknown as {
+  sunoApiCache?: Map<string, SunoApi>;
+};
 const cache = globalForSunoApi.sunoApiCache || new Map<string, SunoApi>();
 globalForSunoApi.sunoApiCache = cache;
 
@@ -51,7 +59,9 @@ class SunoApi {
   private userAgent?: string;
   private cookies: Record<string, string | undefined>;
   private solver = new Solver(process.env.TWOCAPTCHA_KEY + '');
-  private ghostCursorEnabled = yn(process.env.BROWSER_GHOST_CURSOR, { default: false });
+  private ghostCursorEnabled = yn(process.env.BROWSER_GHOST_CURSOR, {
+    default: false
+  });
   private cursor?: Cursor;
 
   constructor(cookies: string) {
@@ -65,22 +75,23 @@ class SunoApi {
         'Device-Id': `"${this.deviceId}"`,
         'x-suno-client': 'Android prerelease-4nt180t 1.0.42',
         'X-Requested-With': 'com.suno.android',
-        'sec-ch-ua': '"Chromium";v="130", "Android WebView";v="130", "Not?A_Brand";v="99"',
+        'sec-ch-ua':
+          '"Chromium";v="130", "Android WebView";v="130", "Not?A_Brand";v="99"',
         'sec-ch-ua-mobile': '?1',
         'sec-ch-ua-platform': '"Android"',
         'User-Agent': this.userAgent
       }
     });
-    this.client.interceptors.request.use(config => {
+    this.client.interceptors.request.use((config) => {
       if (this.currentToken && !config.headers.Authorization)
         config.headers.Authorization = `Bearer ${this.currentToken}`;
-      const cookiesArray = Object.entries(this.cookies).map(([key, value]) => 
+      const cookiesArray = Object.entries(this.cookies).map(([key, value]) =>
         cookie.serialize(key, value as string)
       );
       config.headers.Cookie = cookiesArray.join('; ');
       return config;
     });
-    this.client.interceptors.response.use(resp => {
+    this.client.interceptors.response.use((resp) => {
       const setCookieHeader = resp.headers['set-cookie'];
       if (Array.isArray(setCookieHeader)) {
         const newCookies = cookie.parse(setCookieHeader.join('; '));
@@ -89,7 +100,7 @@ class SunoApi {
         }
       }
       return resp;
-    })
+    });
   }
 
   public async init(): Promise<SunoApi> {
@@ -150,9 +161,13 @@ class SunoApi {
     const renewUrl = `${SunoApi.CLERK_BASE_URL}/v1/client/sessions/${this.sid}/tokens?_is_native=true&_clerk_js_version=${SunoApi.CLERK_VERSION}`;
     // Renew session token
     logger.info('KeepAlive...\n');
-    const renewResponse = await this.client.post(renewUrl, {}, {
-      headers: { Authorization: this.cookies.__client }
-    });
+    const renewResponse = await this.client.post(
+      renewUrl,
+      {},
+      {
+        headers: { Authorization: this.cookies.__client }
+      }
+    );
     if (isWait) {
       await sleep(1, 2);
     }
@@ -186,16 +201,21 @@ class SunoApi {
   /**
    * Clicks on a locator or XY vector. This method is made because of the difference between ghost-cursor-playwright and Playwright methods
    */
-  private async click(target: Locator|Page, position?: { x: number, y: number }): Promise<void> {
+  private async click(
+    target: Locator | Page,
+    position?: { x: number; y: number }
+  ): Promise<void> {
     if (this.ghostCursorEnabled) {
-      let pos: any = isPage(target) ? { x: 0, y: 0 } : await target.boundingBox();
-      if (position) 
+      let pos: any = isPage(target)
+        ? { x: 0, y: 0 }
+        : await target.boundingBox();
+      if (position)
         pos = {
           ...pos,
           x: pos.x + position.x,
           y: pos.y + position.y,
           width: null,
-          height: null,
+          height: null
         };
       return this.cursor?.actions.click({
         target: pos
@@ -203,8 +223,7 @@ class SunoApi {
     } else {
       if (isPage(target))
         return target.mouse.click(position?.x ?? 0, position?.y ?? 0);
-      else
-        return target.click({ force: true, position });
+      else return target.click({ force: true, position });
     }
   }
 
@@ -242,19 +261,25 @@ class SunoApi {
     ];
     // Check for GPU acceleration, as it is recommended to turn it off for Docker
     if (yn(process.env.BROWSER_DISABLE_GPU, { default: false }))
-      args.push('--enable-unsafe-swiftshader',
+      args.push(
+        '--enable-unsafe-swiftshader',
         '--disable-gpu',
-        '--disable-setuid-sandbox');
+        '--disable-setuid-sandbox'
+      );
     const browser = await this.getBrowserType().launch({
       args,
       headless: yn(process.env.BROWSER_HEADLESS, { default: true })
     });
-    const context = await browser.newContext({ userAgent: this.userAgent, locale: process.env.BROWSER_LOCALE, viewport: null });
+    const context = await browser.newContext({
+      userAgent: this.userAgent,
+      locale: process.env.BROWSER_LOCALE,
+      viewport: null
+    });
     const cookies = [];
     const lax: 'Lax' | 'Strict' | 'None' = 'Lax';
     cookies.push({
       name: '__session',
-      value: this.currentToken+'',
+      value: this.currentToken + '',
       domain: '.suno.com',
       path: '/',
       sameSite: lax
@@ -262,11 +287,11 @@ class SunoApi {
     for (const key in this.cookies) {
       cookies.push({
         name: key,
-        value: this.cookies[key]+'',
+        value: this.cookies[key] + '',
         domain: '.suno.com',
         path: '/',
         sameSite: lax
-      })
+      });
     }
     await context.addCookies(cookies);
     return context;
@@ -276,34 +301,38 @@ class SunoApi {
    * Checks for CAPTCHA verification and solves the CAPTCHA if needed
    * @returns {string|null} hCaptcha token. If no verification is required, returns null
    */
-  public async getCaptcha(): Promise<string|null> {
-    if (!await this.captchaRequired())
-      return null;
+  public async getCaptcha(): Promise<string | null> {
+    if (!(await this.captchaRequired())) return null;
 
-    logger.info('CAPTCHA required. Launching browser...')
+    logger.info('CAPTCHA required. Launching browser...');
     logger.info(process.env.CAPTCHA_API_KEY);
     const browser = await this.launchBrowser();
     const page = await browser.newPage();
-    await page.goto('https://suno.com/create', { referer: 'https://www.google.com/', waitUntil: 'domcontentloaded', timeout: 0 });
+    await page.goto('https://suno.com/create', {
+      referer: 'https://www.google.com/',
+      waitUntil: 'domcontentloaded',
+      timeout: 0
+    });
 
     logger.info('Waiting for Suno interface to load');
     // await page.locator('.react-aria-GridList').waitFor({ timeout: 60000 });
     await page.waitForResponse('**/api/project/**\\?**', { timeout: 60000 }); // wait for song list API call
 
-    if (this.ghostCursorEnabled)
-      this.cursor = await createCursor(page);
-    
+    if (this.ghostCursorEnabled) this.cursor = await createCursor(page);
+
     logger.info('Triggering the CAPTCHA');
     try {
       await page.getByLabel('Close').click({ timeout: 2000 }); // close all popups
       // await this.click(page, { x: 318, y: 13 });
-    } catch(e) {}
+    } catch (e) {}
 
     const textarea = page.locator('.custom-textarea');
     await this.click(textarea);
     await textarea.pressSequentially('Lorem ipsum', { delay: 80 });
 
-    const button = page.locator('button[aria-label="Create"]').locator('div.flex');
+    const button = page
+      .locator('button[aria-label="Create"]')
+      .locator('div.flex');
     this.click(button);
 
     const controller = new AbortController();
@@ -313,50 +342,68 @@ class SunoApi {
       try {
         let wait = true;
         while (true) {
-          if (wait)
-            await waitForRequests(page, controller.signal);
-          const drag = (await challenge.locator('.prompt-text').first().innerText()).toLowerCase().includes('drag');
+          if (wait) await waitForRequests(page, controller.signal);
+          const drag = (
+            await challenge.locator('.prompt-text').first().innerText()
+          )
+            .toLowerCase()
+            .includes('drag');
           let captcha: any;
-          for (let j = 0; j < 3; j++) { // try several times because sometimes 2Captcha could return an error
+          for (let j = 0; j < 3; j++) {
+            // try several times because sometimes 2Captcha could return an error
             try {
               logger.info('Sending the CAPTCHA to 2Captcha');
               const payload: paramsCoordinates = {
-                body: (await challenge.screenshot({ timeout: 5000 })).toString('base64'),
+                body: (await challenge.screenshot({ timeout: 5000 })).toString(
+                  'base64'
+                ),
                 lang: process.env.BROWSER_LOCALE
               };
               if (drag) {
                 // Say to the worker that he needs to click
-                payload.textinstructions = 'CLICK on the shapes at their edge or center as shown above—please be precise!';
-                payload.imginstructions = (await fs.readFile(path.join(process.cwd(), 'public', 'drag-instructions.jpg'))).toString('base64');
+                payload.textinstructions =
+                  'CLICK on the shapes at their edge or center as shown above—please be precise!';
+                payload.imginstructions = (
+                  await fs.readFile(
+                    path.join(process.cwd(), 'public', 'drag-instructions.jpg')
+                  )
+                ).toString('base64');
               }
               captcha = await this.solver.coordinates(payload);
               break;
-            } catch(err: any) {
+            } catch (err: any) {
               logger.info(err.message);
-              if (j != 2)
-                logger.info('Retrying...');
-              else
-                throw err;
+              if (j != 2) logger.info('Retrying...');
+              else throw err;
             }
-          } 
+          }
           if (drag) {
             const challengeBox = await challenge.boundingBox();
             if (challengeBox == null)
               throw new Error('.challenge-container boundingBox is null!');
             if (captcha.data.length % 2) {
-              logger.info('Solution does not have even amount of points required for dragging. Requesting new solution...');
+              logger.info(
+                'Solution does not have even amount of points required for dragging. Requesting new solution...'
+              );
               this.solver.badReport(captcha.id);
               wait = false;
               continue;
             }
             for (let i = 0; i < captcha.data.length; i += 2) {
               const data1 = captcha.data[i];
-              const data2 = captcha.data[i+1];
+              const data2 = captcha.data[i + 1];
               logger.info(JSON.stringify(data1) + JSON.stringify(data2));
-              await page.mouse.move(challengeBox.x + +data1.x, challengeBox.y + +data1.y);
+              await page.mouse.move(
+                challengeBox.x + +data1.x,
+                challengeBox.y + +data1.y
+              );
               await page.mouse.down();
               await sleep(1.1); // wait for the piece to be 'unlocked'
-              await page.mouse.move(challengeBox.x + +data2.x, challengeBox.y + +data2.y, { steps: 30 });
+              await page.mouse.move(
+                challengeBox.x + +data2.x,
+                challengeBox.y + +data2.y,
+                { steps: 30 }
+              );
               await page.mouse.up();
             }
             wait = true;
@@ -364,27 +411,30 @@ class SunoApi {
             for (const data of captcha.data) {
               logger.info(data);
               await this.click(challenge, { x: +data.x, y: +data.y });
-            };
+            }
           }
-          this.click(frame.locator('.button-submit')).catch(e => {
-            if (e.message.includes('viewport')) // when hCaptcha window has been closed due to inactivity,
-              this.click(button); // click the Create button again to trigger the CAPTCHA
-            else
-              throw e;
+          this.click(frame.locator('.button-submit')).catch((e) => {
+            if (e.message.includes('viewport'))
+              // when hCaptcha window has been closed due to inactivity,
+              this.click(button);
+            // click the Create button again to trigger the CAPTCHA
+            else throw e;
           });
         }
-      } catch(e: any) {
-        if (e.message.includes('been closed') // catch error when closing the browser
-          || e.message == 'AbortError') // catch error when waitForRequests is aborted
+      } catch (e: any) {
+        if (
+          e.message.includes('been closed') || // catch error when closing the browser
+          e.message == 'AbortError'
+        )
+          // catch error when waitForRequests is aborted
           resolve();
-        else
-          reject(e);
+        else reject(e);
       }
-    }).catch(e => {
+    }).catch((e) => {
       browser.browser()?.close();
       throw e;
     });
-    return (new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       page.route('**/api/generate/v2/**', async (route: any) => {
         try {
           logger.info('hCaptcha token received. Closing browser');
@@ -392,13 +442,16 @@ class SunoApi {
           browser.browser()?.close();
           controller.abort();
           const request = route.request();
-          this.currentToken = request.headers().authorization.split('Bearer ').pop();
+          this.currentToken = request
+            .headers()
+            .authorization.split('Bearer ')
+            .pop();
           resolve(request.postDataJSON().token);
-        } catch(err) {
+        } catch (err) {
           reject(err);
         }
       });
-    }));
+    });
   }
 
   /**
@@ -408,7 +461,8 @@ class SunoApi {
     return this.client.post(
       `https://clerk.suno.com/v1/client?__clerk_api_version=2021-02-05&_clerk_js_version=${SunoApi.CLERK_VERSION}&_method=PATCH`,
       { captcha_error: '300030,300030,300030' },
-      { headers: { 'content-type': 'application/x-www-form-urlencoded' } });
+      { headers: { 'content-type': 'application/x-www-form-urlencoded' } }
+    );
   }
 
   /**
@@ -514,7 +568,7 @@ class SunoApi {
    * @param wait_audio Indicates if the method should wait for the audio file to be fully generated before returning.
    * @param negative_tags Negative tags that should not be included in the generated audio.
    * @param task Optional indication of what to do. Enter 'extend' if extending an audio, otherwise specify null.
-   * @param continue_clip_id 
+   * @param continue_clip_id
    * @returns A promise that resolves to an array of AudioInfo objects representing the generated songs.
    */
   private async generateSongs(
@@ -666,7 +720,19 @@ class SunoApi {
     model?: string,
     wait_audio?: boolean
   ): Promise<AudioInfo[]> {
-    return this.generateSongs(prompt, true, tags, title, false, model, wait_audio, negative_tags, 'extend', audioId, continueAt);
+    return this.generateSongs(
+      prompt,
+      true,
+      tags,
+      title,
+      false,
+      model,
+      wait_audio,
+      negative_tags,
+      'extend',
+      audioId,
+      continueAt
+    );
   }
 
   /**
@@ -677,7 +743,8 @@ class SunoApi {
   public async generateStems(song_id: string): Promise<AudioInfo[]> {
     await this.keepAlive(false);
     const response = await this.client.post(
-      `${SunoApi.BASE_URL}/api/edit/stems/${song_id}`, {}
+      `${SunoApi.BASE_URL}/api/edit/stems/${song_id}`,
+      {}
     );
 
     console.log('generateStems response:\n', response?.data);
@@ -691,7 +758,6 @@ class SunoApi {
     }));
   }
 
-
   /**
    * Get the lyric alignment for a song.
    * @param song_id The ID of the song to get the lyric alignment for.
@@ -699,7 +765,9 @@ class SunoApi {
    */
   public async getLyricAlignment(song_id: string): Promise<object> {
     await this.keepAlive(false);
-    const response = await this.client.get(`${SunoApi.BASE_URL}/api/gen/${song_id}/aligned_lyrics/v2/`);
+    const response = await this.client.get(
+      `${SunoApi.BASE_URL}/api/gen/${song_id}/aligned_lyrics/v2/`
+    );
 
     console.log(`getLyricAlignment ~ response:`, response.data);
     return response.data?.aligned_words.map((transcribedWord: any) => ({
@@ -805,16 +873,20 @@ class SunoApi {
 }
 
 export const sunoApi = async (cookie?: string) => {
-  const resolvedCookie = cookie && cookie.includes('__client') ? cookie : process.env.SUNO_COOKIE; // Check for bad `Cookie` header (It's too expensive to actually parse the cookies *here*)
+  const resolvedCookie =
+    cookie && cookie.includes('__client') ? cookie : process.env.SUNO_COOKIE; // Check for bad `Cookie` header (It's too expensive to actually parse the cookies *here*)
   if (!resolvedCookie) {
-    logger.info('No cookie provided! Aborting...\nPlease provide a cookie either in the .env file or in the Cookie header of your request.')
-    throw new Error('Please provide a cookie either in the .env file or in the Cookie header of your request.');
+    logger.info(
+      'No cookie provided! Aborting...\nPlease provide a cookie either in the .env file or in the Cookie header of your request.'
+    );
+    throw new Error(
+      'Please provide a cookie either in the .env file or in the Cookie header of your request.'
+    );
   }
 
   // Check if the instance for this cookie already exists in the cache
   const cachedInstance = cache.get(resolvedCookie);
-  if (cachedInstance)
-    return cachedInstance;
+  if (cachedInstance) return cachedInstance;
 
   // If not, create a new instance and initialize it
   const instance = await new SunoApi(resolvedCookie).init();
