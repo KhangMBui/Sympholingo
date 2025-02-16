@@ -53,7 +53,7 @@ function App() {
       const fullMessage = data.message;
       let currentText = "";
 
-      fullMessage.split("").forEach((char, index) => {
+      fullMessage.split("").forEach((char: string, index: number) => {
         setTimeout(() => {
           currentText += char;
           setMessages((prev) => {
@@ -90,60 +90,64 @@ function App() {
 
   return (
     <div className="app">
-      <div className="header">
-        <h1 className="app-title">Sympholingo</h1>
-        <h2 className="app-description">
-          Learn languages through the harmony of music.
-        </h2>
-      </div>
-      <div className="chat-content">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`message-container ${
-              msg.sender === "user" ? "user-message" : "bot-message"
-            }`}
-          >
-            <div className="message-content">{msg.text}</div>
-          </div>
-        ))}
-      </div>
-      <div className="chat-input">
+      <div className="sidebar">
         <input
           type="text"
           placeholder="Enter a genre of music"
-          className="chat-input-field"
+          className="sidebar-input"
           value={genre}
           onChange={(e) => setGenre(e.target.value)}
         />
         <input
           type="text"
           placeholder="Enter your native language"
-          className="chat-input-field"
+          className="sidebar-input"
           value={nativeLanguage}
           onChange={(e) => setNativeLanguage(e.target.value)}
         />
         <input
           type="text"
           placeholder="Enter the language you want to learn"
-          className="chat-input-field"
+          className="sidebar-input"
           value={learningLanguage}
           onChange={(e) => setLearningLanguage(e.target.value)}
         />
         <button
-          className="chat-send"
+          className="sidebar-button"
           onClick={handleSubmit}
           disabled={isTyping}
         >
           {isTyping ? "Typing..." : "Send"}
         </button>
         <button
-          className="chat-clear"
+          className="sidebar-button clear-button"
           onClick={handleClearChat}
           disabled={isTyping}
         >
           Clear Chat
         </button>
+      </div>
+
+      <div className="main-content">
+        <div className="header">
+          <h1 className="app-title">Sympholingo</h1>
+          <h2 className="app-description">
+            Learn languages through the harmony of music.
+          </h2>
+        </div>
+        <div className="chat-content">
+          {messages.map((msg, index) => (
+            <div
+              key={index}
+              className={`message-container ${
+                msg.sender === "user" ? "user-message" : "bot-message"
+              }`}
+            >
+              <div className="message-content">{msg.text}</div>
+            </div>
+          ))}
+          {isTyping && <div className="typing-indicator">Bot is typing...</div>}
+        </div>
       </div>
     </div>
   );
