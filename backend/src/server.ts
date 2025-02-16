@@ -42,12 +42,12 @@ app.post("/test-generate-music", async (req, res) => {
     res.json(music);
   } catch (error) {
     if (error instanceof Error) {
-      console.error("❌ Error generating music:", error.message);
+      console.error("Error generating music:", error.message);
       res
         .status(500)
         .json({ error: error.message || "An unknown error occurred" });
     } else {
-      console.error("❌ Error generating music:", error);
+      console.error("Error generating music:", error);
       res.status(500).json({ error: "An unknown error occurred" });
     }
   }
