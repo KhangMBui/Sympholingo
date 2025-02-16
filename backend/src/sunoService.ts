@@ -8,7 +8,11 @@ interface GenerateMusicRequest {
 }
 
 interface GenerateMusicResponse {
-  data: string; // Adjust based on actual response structure
+  text : string; // Adjust based on actual response structure
+  tile : string;
+  status : string;
+  error_message : string;
+  tags : string;
 }
 
 export const generateMusic = async (request: GenerateMusicRequest): Promise<GenerateMusicResponse> => {

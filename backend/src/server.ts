@@ -2,9 +2,10 @@ import express from "express";
 import cors from "cors";
 import { generateMusic } from "./sunoService";
 import chatRoutes from "./routes/chatRoutes";
+import { translateAndAnnotateLyrics } from "./openAI/openaiService";
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 1000;
 
 app.use(cors());
 app.use(express.json());
@@ -40,6 +41,13 @@ app.listen(PORT, () => {
       const model = "latest";
       const music = await generateMusic({ prompt, model });
       console.log("Generated music:", music);
+
+      // Once we generaged the music. Let's make have the lyrics translation
+      // line by line by line.
+      const targetLang = "vi";
+      console.log(music.text);
+      const result = await translateAndAnnotateLyrics(music.text, targetLang);
+      console.log("Translation", result)
     } catch (error) {
       if (error instanceof Error) {
         console.error("Error generating music:", error.message);
