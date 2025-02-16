@@ -1,10 +1,11 @@
-import OpenAI from "openai";
-//import dotenv from "dotenv";
+import OpenAI from "openai"
+import dotenv from "dotenv";
 
-//dotenv.config();
+dotenv.config({ path: '../backend/src/config/.env' });
 
+console.log("OpenAI API Key:", process.env.OPENAI_API_KEY);
 const openai = new OpenAI({
-  apiKey: "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"
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 interface TranslationResult {
