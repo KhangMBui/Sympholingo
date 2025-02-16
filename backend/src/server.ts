@@ -1,16 +1,19 @@
 import express from "express";
 import cors from "cors";
 import { generateMusic } from "./sunoService";
+import chatRoutes from "./routes/chatRoutes";
 
 const app = express();
-const PORT = 5008;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
+app.use("/chat", chatRoutes);
 
 app.get("/", (req, res) => {
-  res.json({ message: "Hello from Express!" });
+  res.json({ message: "Hello from the backend of Sympholingo!" });
 });
+
 
 app.get("/test-generate-music", async (req, res) => {
   try {
@@ -27,6 +30,7 @@ app.get("/test-generate-music", async (req, res) => {
   }
 });
 
+// Handle user input of the three fields: genre, native language, and learning language
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   // Automatically test the Suno API when the server starts
