@@ -35,44 +35,39 @@ function App() {
     const requestData = { genre, nativeLanguage, learningLanguage };
 
     try {
-      const response = await fetch("http://localhost:5000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
-      });
+      const response = await fetch(
+        "http://localhost:5000/test-generate-music",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData),
+        }
+      );
 
       if (!response.ok) {
-        throw new Error("Failed to send data to the server.");
+        throw new Error("Failed to generate music.");
       }
 
       const data = await response.json();
 
-      let botMessage = { sender: "bot", text: "" };
-      setMessages((prev) => [...prev, botMessage]);
+      const botMessage = {
+        sender: "bot",
+        text: "🎶 Music generated successfully!",
+      };
 
-      const fullMessage = data.message;
-      let currentText = "";
+      const musicMessage = {
+        sender: "bot",
+        text: data.text, // Extracting only the text from the response
+      };
 
-      fullMessage.split("").forEach((char: string, index: number) => {
-        setTimeout(() => {
-          currentText += char;
-          setMessages((prev) => {
-            const updatedMessages = [...prev];
-            updatedMessages[updatedMessages.length - 1] = {
-              sender: "bot",
-              text: currentText,
-            };
-            return updatedMessages;
-          });
+      setMessages((prev) => [...prev, botMessage, musicMessage]);
 
-          if (index === fullMessage.length - 1) {
-            setIsTyping(false);
-          }
-        }, 20 * index);
-      });
+      console.log("Generated Music Data kakaka:", data); // Handle the music response properly
+
+      setIsTyping(false);
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while sending data.");
+      alert("An error occurred while generating music.");
       setIsTyping(false);
     }
 
