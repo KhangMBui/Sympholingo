@@ -4,20 +4,20 @@ const handleChat = (req: Request, res: Response): void => {
   console.log("📩 Received request body:", req.body);
   const { genre, nativeLanguage, learningLanguage } = req.body;
 
-  if (!genre || !nativeLanguage || !learningLanguage) {
-    res.status(400).json({ message: "Please fill in all fields." });
-    return;
-  }
-
-  // res.json({
-  //   message: `Received: Genre - ${genre}, Native Language - ${nativeLanguage}, Learning Language - ${learningLanguage}`,
-  // });
+  // Provide default values if any fields are missing
+  const safeGenre = genre || "Rock";
+  const safeNativeLanguage = nativeLanguage || "English";
+  const safeLearningLanguage = learningLanguage || "Spanish";
 
   // Generate a chatbot-like response
-  const botResponse = `🎶 You chose ${genre} music to learn ${learningLanguage}! Since your native language is ${nativeLanguage}, I'll find some great ${genre} songs with ${learningLanguage} lyrics for you!`;
+  const botResponse = `🎶 You chose ${safeGenre} music to learn ${safeLearningLanguage}! Since your native language is ${safeNativeLanguage}, I'll find some great ${safeGenre} songs with ${safeLearningLanguage} lyrics for you!`;
 
-  // Send response back to frontend
-  res.json({ message: botResponse });
+  // Generate a descriptive prompt for music generation
+  const musicPrompt = `Create a ${safeGenre} song with lyrics in ${safeLearningLanguage}.`;
+
+  console.log("🎤 Chat generated prompt:", musicPrompt);
+
+  res.json({ message: botResponse, prompt: musicPrompt });
 };
 
 export default handleChat;
