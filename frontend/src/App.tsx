@@ -35,14 +35,11 @@ function App() {
     const requestData = { genre, nativeLanguage, learningLanguage };
 
     try {
-      const response = await fetch(
-        "http://localhost:5000/test-generate-music",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        }
-      );
+      const response = await fetch("http://localhost:5000/generate-music", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(requestData),
+      });
 
       if (!response.ok) {
         throw new Error("Failed to generate music.");
@@ -57,12 +54,17 @@ function App() {
 
       const musicMessage = {
         sender: "bot",
-        text: data.text, // Extracting only the text from the response
+        text: data.lyrics, // Extracting only the text from the response
       };
 
-      setMessages((prev) => [...prev, botMessage, musicMessage]);
+      // const audioURL = {
+      //   sender: "bot",
+      //   text: data.audioUrl,
+      // };
 
       console.log("Generated Music Data kakaka:", data); // Handle the music response properly
+
+      setMessages((prev) => [...prev, botMessage, musicMessage]);
 
       setIsTyping(false);
     } catch (error) {

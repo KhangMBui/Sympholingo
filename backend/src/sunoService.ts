@@ -34,3 +34,23 @@ export const generateMusic = async (
     }
   }
 };
+
+// export const generateAudio = async (
+//   request: GenerateMusicRequest
+// ): Promise<GenerateMusicResponse> => {
+//   try {
+//     const url = `${API_URL}/api/generate`;
+//     const response = await axios.post<GenerateMusicResponse>(url, request, {
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//     });
+//     return response.data;
+//   } catch (error) {
+//     if (error instanceof Error) {
+//       throw new Error(`Error generating music: ${error.message}`);
+//     } else {
+//       throw new Error("An unknown error occurred");
+//     }
+//   }
+// };
