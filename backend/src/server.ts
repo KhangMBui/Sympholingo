@@ -1,12 +1,11 @@
 import express from "express";
 import cors from "cors";
 import { generateMusic } from "./sunoService";
-import axios from "axios";
 import chatRoutes from "./routes/chatRoutes";
 import { translateAndAnnotateLyrics } from "./openAI/openaiService";
 
 const app = express();
-const PORT = process.env.PORT || 1050;
+const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -16,9 +15,8 @@ app.get("/", (req, res) => {
   res.json({ message: "Hello from the backend of Sympholingo!" });
 });
 
-app.post("/test-generate-music", async (req, res) => {
+app.post("/generate-music", async (req, res) => {
   try {
-    // Step 1: Get user input from frontend
     const { genre, nativeLanguage, learningLanguage } = req.body;
 
     if (!genre || !nativeLanguage || !learningLanguage) {
@@ -26,58 +24,64 @@ app.post("/test-generate-music", async (req, res) => {
       return;
     }
 
-    console.log("📩 Received request body:", req.body);
+    console.log("Received request:", req.body);
 
-    // Step 2: Construct the music generation prompt
-    const prompt = `Generate a ${genre} song in ${learningLanguage}.`;
+    // Step 1: Generate Lyrics
+    const lyricsPrompt = `Generate a ${genre} song in ${learningLanguage}.`;
+    console.log("🎶 Generating lyrics with prompt:", lyricsPrompt);
 
-    console.log("🎶 Using generated prompt:", prompt);
+    const lyrics = await generateMusic({
+      prompt: lyricsPrompt,
+      model: "latest",
+    });
 
-    // Step 3: Call the Suno music generation service with the constructed prompt
-    const model = "latest";
-    const music = await generateMusic({ prompt, model });
-
-    console.log("🎼 Music generated successfully!");
-
-    // Step 4: Return the generated music
-    res.json(music);
-    
-  } catch (error) {
-    if (error instanceof Error) {
-      console.error("❌ Error generating music:", error.message);
-      res
-        .status(500)
-        .json({ error: error.message || "An unknown error occurred" });
-    } else {
-      console.error("❌ Error generating music:", error);
-      res.status(500).json({ error: "An unknown error occurred" });
+    if (!lyrics || !lyrics.text) {
+      throw new Error("Failed to generate lyrics.");
     }
+    console.log("📜 Lyrics generated successfully!");
+
+    // Step 2: Translate and Annotate Lyrics
+    console.log("🌍 Translating lyrics...");
+    const translatedLyrics = await translateAndAnnotateLyrics(
+      lyrics.text,
+      nativeLanguage
+    );
+    console.log("✅ Translation completed!");
+
+    res.json({
+      lyrics: lyrics.text,
+      translatedLyrics,
+    });
+  } catch (error) {
+    console.error("Error generating music:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "An unknown error occurred";
+    res.status(500).json({ error: errorMessage });
   }
 });
 
-// Handle user input of the three fields: genre, native language, and learning language
-app.listen(PORT, async () => {
+// Start server
+app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
-  // Automatically test the Suno API when the server starts
-  (async () => {
-    try {
-      const prompt = "Generate a happy tune";
-      const model = "latest";
-      const music = await generateMusic({ prompt, model });
-      console.log("Generated music:", music);
+  // (async () => {
+  //   try {
+  //     const prompt = "Generate a happy tune";
+  //     const model = "latest";
+  //     const music = await generateMusic({ prompt, model });
+  //     console.log("Generated music:", music);
 
-      // Once we generaged the music. Let's make have the lyrics translation
-      // line by line by line.
-      const targetLang = "vi";
-      console.log(music.text);
-      const result = await translateAndAnnotateLyrics(music.text, targetLang);
-      console.log("Translation", result)
-    } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error generating music:", error.message);
-      } else {
-        console.error("An unknown error occurred");
-      }
-    }
-  })();
+  //     // Once we generaged the music. Let's make have the lyrics translation
+  //     // line by line by line.
+  //     const targetLang = "vi";
+  //     console.log(music.text);
+  //     const result = await translateAndAnnotateLyrics(music.text, targetLang);
+  //     console.log("Translation", result);
+  //   } catch (error) {
+  //     if (error instanceof Error) {
+  //       console.error("Error generating music:", error.message);
+  //     } else {
+  //       console.error("An unknown error occurred");
+  //     }
+  //   }
+  // })();
 });

@@ -1,10 +1,10 @@
 import OpenAI from "openai";
 import dotenv from "dotenv";
 
-dotenv.config({ path: '../backend/src/config/.env' });
+dotenv.config({ path: "../backend/src/config/.env" });
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 interface TranslationResult {
@@ -12,13 +12,19 @@ interface TranslationResult {
   annotatedLyrics: string;
 }
 
-export async function translateAndAnnotateLyrics(lyrics: string, targetLang: string): Promise<TranslationResult | undefined> {
+export async function translateAndAnnotateLyrics(
+  lyrics: string,
+  targetLang: string
+): Promise<TranslationResult | undefined> {
   try {
     // Step 1: Translate the lyrics
     const translationResponse = await openai.chat.completions.create({
       model: "o1-mini",
       messages: [
-        { role: "user", content: `Translate the following lyrics to ${targetLang}: ${lyrics}` },
+        {
+          role: "user",
+          content: `Translate the following lyrics to ${targetLang}: ${lyrics}`,
+        },
       ],
     });
 
@@ -28,7 +34,11 @@ export async function translateAndAnnotateLyrics(lyrics: string, targetLang: str
     const annotationResponse = await openai.chat.completions.create({
       model: "o1-mini",
       messages: [
-        { role: "user", content: `Annotate the following lyrics with subjects, verbs, and objects: ${lyrics}` },
+        {
+          role: "user",
+          content: `In 
+          ${targetLang}, annotate the following lyrics with subjects, verbs, and objects: ${lyrics}.`,
+        },
       ],
     });
 
