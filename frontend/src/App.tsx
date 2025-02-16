@@ -28,7 +28,7 @@ function App() {
 
     const userMessage = {
       sender: "user",
-      text: `🎵 Genre: ${genre}\n🌍 Native: ${nativeLanguage}\n📝 Learning: ${learningLanguage}`,
+      text: `🔴 Genre: ${genre}\n🟢 Native: ${nativeLanguage}\n🔵 Learning: ${learningLanguage}`,
     };
     setMessages((prev) => [...prev, userMessage]);
 
@@ -86,46 +86,52 @@ function App() {
   return (
     <div className="app">
       <div className="sidebar">
-        <input
-          type="text"
-          placeholder="Enter a genre of music"
-          className="sidebar-input"
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Enter your native language"
-          className="sidebar-input"
-          value={nativeLanguage}
-          onChange={(e) => setNativeLanguage(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Enter the language you want to learn"
-          className="sidebar-input"
-          value={learningLanguage}
-          onChange={(e) => setLearningLanguage(e.target.value)}
-        />
-        <button
-          className="sidebar-button"
-          onClick={handleSubmit}
-          disabled={isTyping}
-        >
-          {isTyping ? "Typing..." : "Send"}
-        </button>
-        <button
-          className="sidebar-button clear-button"
-          onClick={handleClearChat}
-          disabled={isTyping}
-        >
-          Clear Chat
-        </button>
+        <img src="/src/assets/SympholingoLogo.png" alt="Sympholingo Logo" className="logo" />
+        <h1 className="app-title">
+          <span className="sympho">Sympho</span>
+          <span className="lingo">lingo</span>
+        </h1>
+        <div className="sidebar-content">
+          <input
+            type="text"
+            placeholder="Enter a genre of music"
+            className="sidebar-input"
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Enter your native language"
+            className="sidebar-input"
+            value={nativeLanguage}
+            onChange={(e) => setNativeLanguage(e.target.value)}
+          />
+          <input
+            type="text"
+            placeholder="Enter the language you want to learn"
+            className="sidebar-input"
+            value={learningLanguage}
+            onChange={(e) => setLearningLanguage(e.target.value)}
+          />
+          <button
+            className="sidebar-button"
+            onClick={handleSubmit}
+            disabled={isTyping}
+          >
+            {isTyping ? "Generating..." : "Generate Music"}
+          </button>
+          <button
+            className="sidebar-button clear-button"
+            onClick={handleClearChat}
+            disabled={isTyping}
+          >
+            Clear Chat
+          </button>
+        </div>
       </div>
 
       <div className="main-content">
         <div className="header">
-          <h1 className="app-title">Sympholingo</h1>
           <h2 className="app-description">
             Learn languages through the harmony of music.
           </h2>
@@ -141,7 +147,7 @@ function App() {
               <div className="message-content">{msg.text}</div>
             </div>
           ))}
-          {isTyping && <div className="typing-indicator">Bot is typing...</div>}
+          {isTyping && <div className="typing-indicator">Bot is Generating...</div>}
         </div>
       </div>
     </div>
