@@ -27,36 +27,31 @@ app.post("/generate-music", async (req, res) => {
     console.log("Received request:", req.body);
 
     // Step 1: Generate Lyrics
-    const lyricsPrompt = `Generate a ${genre} song in ${learningLanguage}.`;
-    console.log("🎶 Generating lyrics with prompt:", lyricsPrompt);
+    const musicPrompt = `Generate a ${genre} song in ${learningLanguage}.`;
+    console.log("🎶 Generating lyrics with prompt:", musicPrompt);
 
-    const lyrics = await generateMusic({
-      prompt: lyricsPrompt,
+    const data = await generateMusic({
+      prompt: musicPrompt,
       model: "latest",
+      wait_audio: true,
     });
 
-    if (!lyrics || !lyrics.text) {
+    if (!data || !data.lyric) {
       throw new Error("Failed to generate lyrics.");
     }
 
-    console.log("📜 Lyrics generated successfully!");
+    console.log("Lyrics generated successfully!");
 
-    // Step 2: Generate Audio
-    // const audioPrompt = `Create an audio file for this ${genre} song in ${learningLanguage}.`;
-    // console.log("🔊 Generating audio with prompt:", audioPrompt);
+    if (!data.audio_url) {
+      throw new Error("Failed to generate audio url.");
+    }
 
-    // const audio = await generateAudio({ prompt: audioPrompt, model: "latest" });
-
-    // if (!audio || !audio.text) {
-    //   throw new Error("Failed to generate audio.");
-    // }
-
-    // console.log("🎼 Audio generated successfully!");
+    console.log("Audio generated successfully!");
 
     // Step 3: Return both lyrics and audio
     res.json({
-      lyrics: lyrics.text,
-      // audioUrl: audio.text,
+      lyrics: data.lyric,
+      audioUrl: data.audio_url,
     });
   } catch (error) {
     console.error("Error generating music:", error);

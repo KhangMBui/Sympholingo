@@ -57,14 +57,14 @@ function App() {
         text: data.lyrics, // Extracting only the text from the response
       };
 
-      // const audioURL = {
-      //   sender: "bot",
-      //   text: data.audioUrl,
-      // };
+      const audioURL = {
+        sender: "bot",
+        text: data.audioUrl,
+      };
 
       console.log("Generated Music Data kakaka:", data); // Handle the music response properly
 
-      setMessages((prev) => [...prev, botMessage, musicMessage]);
+      setMessages((prev) => [...prev, botMessage, musicMessage, audioURL]);
 
       setIsTyping(false);
     } catch (error) {

@@ -5,13 +5,23 @@ const API_URL = "http://localhost:3000"; // Replace with your Suno API endpoint
 interface GenerateMusicRequest {
   prompt: string;
   model: string;
+  // make_instrumental: boolean;
+  wait_audio: boolean;
 }
 
 interface GenerateMusicResponse {
-  text: string; // Adjust based on actual response structure
-  tile: string;
+  id: string;
+  title: string;
+  image_url: string;
+  lyric: string;
+  audio_url: string;
+  video_url: string;
+  created_at: string;
+  model_name: string;
   status: string;
-  error_message: string;
+  gpt_description_prompt: string;
+  prompt: string;
+  type: string;
   tags: string;
 }
 
@@ -19,7 +29,7 @@ export const generateMusic = async (
   request: GenerateMusicRequest
 ): Promise<GenerateMusicResponse> => {
   try {
-    const url = `${API_URL}/api/generate_lyrics`;
+    const url = `${API_URL}/api/generate`;
     const response = await axios.post<GenerateMusicResponse>(url, request, {
       headers: {
         "Content-Type": "application/json",
