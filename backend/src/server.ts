@@ -5,7 +5,7 @@ import chatRoutes from "./routes/chatRoutes";
 import { translateAndAnnotateLyrics } from "./openAI/openaiService";
 
 const app = express();
-const PORT = process.env.PORT || 1000;
+const PORT = process.env.PORT || 1050;
 
 app.use(cors());
 app.use(express.json());
