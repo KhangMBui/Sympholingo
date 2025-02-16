@@ -52,7 +52,7 @@ function App() {
 
       const botMessage = {
         sender: "bot",
-        text: "🎶 Music generated successfully!",
+        text: "✔️ Music generated successfully!",
       };
 
       const musicMessage = {

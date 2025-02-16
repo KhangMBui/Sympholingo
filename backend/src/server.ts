@@ -40,6 +40,7 @@ app.post("/test-generate-music", async (req, res) => {
 
     // Step 4: Return the generated music
     res.json(music);
+    
   } catch (error) {
     if (error instanceof Error) {
       console.error("❌ Error generating music:", error.message);
