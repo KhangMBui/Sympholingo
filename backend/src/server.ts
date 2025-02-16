@@ -3,7 +3,7 @@ import cors from "cors";
 import { generateMusic } from "./sunoService";
 
 const app = express();
-const PORT = 5006;
+const PORT = 5008;
 
 app.use(cors());
 app.use(express.json());
