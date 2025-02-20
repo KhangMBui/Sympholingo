@@ -7,8 +7,9 @@
 
 An AI-powered language learning app that teaches grammar and vocabulary through **original music**, leveraging OpenAI for translations/analysis and Suno AI for song generation.
 
+<div align="center">
 ![image](https://github.com/user-attachments/assets/22ba7612-d059-433d-bfb3-b57b3115929a)
-
+</div>
 ## ✨ Features
 
 - 🎸 **Custom Song Generation**: Creates original songs in your target language (any genre!)
