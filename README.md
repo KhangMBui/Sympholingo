@@ -1,13 +1,13 @@
 # Sympholingo 🎵🌍
 
 🏆 **CrimsonCode Hackathon 2025 Double Winner**  
-**Best GenAI Hack** & **2nd Main Track Winner**
+**Best GenAI Hack 🥇** & **2nd Main Track Winner 🥈**
 
 [![Devpost Submission](https://img.shields.io/badge/Devpost-View%20Project-blue)](https://devpost.com/software/sympholingo)
 
 An AI-powered language learning app that teaches grammar and vocabulary through **original music**, leveraging OpenAI for translations/analysis and Suno AI for song generation.
 
-![Sympholingo Demo](screenshot.png) *<!-- Add screenshot here if available -->*
+![image](https://github.com/user-attachments/assets/22ba7612-d059-433d-bfb3-b57b3115929a)
 
 ## ✨ Features
 
